@@ -1,0 +1,35 @@
+<?php
+require_once __DIR__ . '/admin/includes/auth.php';
+$gallery = read_json_file(GALLERY_FILE);
+$categories = [];
+foreach ($gallery as $item) {
+    if (!empty($item['category'])) { $categories[$item['category']] = true; }
+}
+$selectedCategory = trim($_GET['category'] ?? '');
+$visibleGallery = $selectedCategory === '' ? $gallery : array_values(array_filter($gallery, static fn ($item) => ($item['category'] ?? '') === $selectedCategory));
+include "includes/header.php";
+?>
+
+<style>
+    .public-gallery { --gallery-navy:#0A192F; --gallery-orange:#F58220; --gallery-ink:#0F172A; --gallery-muted:#64748B; font-family:'Plus Jakarta Sans',sans-serif; background:#F8FAFC; color:var(--gallery-ink); }
+    .gallery-hero { min-height:390px; position:relative; display:flex; align-items:center; overflow:hidden; background:var(--gallery-navy); }
+    .gallery-hero::before { content:''; position:absolute; inset:0; background:linear-gradient(90deg,rgba(5,15,35,.94),rgba(10,25,47,.62),rgba(10,25,47,.82)); z-index:1; }
+    .gallery-hero-bg { position:absolute; inset:0; background:url('assets/images/photo-15.jpeg') center/cover no-repeat; animation:galleryZoom 14s ease-in-out infinite alternate; }
+    @keyframes galleryZoom { from{transform:scale(1.02)} to{transform:scale(1.08)} }
+    .gallery-hero-inner { position:relative; z-index:2; width:min(1200px,90%); margin:auto; padding:70px 0; }
+    .gallery-breadcrumb { display:flex; gap:12px; align-items:center; color:#CBD5E1; font-size:13px; margin-bottom:45px; }.gallery-breadcrumb a { color:#fff; text-decoration:none; }.gallery-breadcrumb a:hover { color:var(--gallery-orange); }.gallery-breadcrumb i { color:var(--gallery-orange); font-size:11px; }
+    .gallery-kicker { color:var(--gallery-orange); font-size:12px; font-weight:800; letter-spacing:2px; text-transform:uppercase; }.gallery-hero h1 { color:#fff; font-size:clamp(38px,5.5vw,68px); font-weight:800; line-height:1.08; margin:15px 0; }.gallery-hero h1 span { color:var(--gallery-orange); }.gallery-hero p { max-width:560px; color:#CBD5E1; line-height:1.7; font-size:16px; margin:0; }
+    .gallery-content { width:min(1200px,90%); margin:0 auto; padding:82px 0 100px; }.gallery-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:25px; margin-bottom:32px; }.gallery-heading h2 { color:var(--gallery-navy); font-size:clamp(27px,4vw,42px); font-weight:800; margin:0 0 8px; }.gallery-heading p { color:var(--gallery-muted); font-size:14px; margin:0; }.gallery-filters { display:flex; flex-wrap:wrap; gap:9px; justify-content:flex-end; }.gallery-filter { color:var(--gallery-muted); background:#fff; border:1px solid #E2E8F0; border-radius:4px; padding:9px 13px; font-size:12px; font-weight:700; text-decoration:none; transition:.2s ease; }.gallery-filter:hover,.gallery-filter.active { color:#fff; background:var(--gallery-orange); border-color:var(--gallery-orange); }
+    .gallery-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }.gallery-item { overflow:hidden; background:#fff; border:1px solid #E2E8F0; border-radius:7px; box-shadow:0 12px 28px rgba(10,25,47,.05); }.gallery-media { height:245px; position:relative; overflow:hidden; background:var(--gallery-navy); }.gallery-media img,.gallery-media video { width:100%; height:100%; display:block; object-fit:cover; }.gallery-item:hover .gallery-media img { transform:scale(1.05); }.gallery-media img { transition:transform .5s ease; }.gallery-type { position:absolute; top:13px; left:13px; color:#fff; background:rgba(10,25,47,.78); border-radius:3px; padding:6px 9px; font-size:10px; font-weight:800; letter-spacing:.6px; text-transform:uppercase; }.gallery-item-copy { padding:17px 18px 19px; }.gallery-item-copy h3 { color:var(--gallery-ink); font-size:16px; font-weight:800; margin:0 0 7px; }.gallery-item-copy span { color:#D96A0C; font-size:12px; font-weight:700; }.gallery-empty { padding:70px 20px; text-align:center; border:1px dashed #CBD5E1; background:#fff; color:var(--gallery-muted); }.gallery-empty i { display:block; color:var(--gallery-orange); font-size:34px; margin-bottom:15px; }.gallery-empty strong { display:block; color:var(--gallery-navy); margin-bottom:6px; }
+    @media (max-width:900px) { .gallery-heading { display:block; }.gallery-filters { justify-content:flex-start; margin-top:22px; }.gallery-grid { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:575px) { .gallery-content { padding:60px 0 72px; }.gallery-grid { grid-template-columns:1fr; }.gallery-media { height:220px; }.gallery-hero { min-height:360px; } }
+</style>
+
+<main class="public-gallery">
+    <section class="gallery-hero" aria-labelledby="gallery-title"><div class="gallery-hero-bg" aria-hidden="true"></div><div class="gallery-hero-inner"><nav class="gallery-breadcrumb" aria-label="Breadcrumb"><a href="index.php"><i class="fa-solid fa-house"></i> Home</a><i class="fa-solid fa-chevron-right" aria-hidden="true"></i><span aria-current="page">Gallery</span></nav><span class="gallery-kicker">Work that speaks for itself</span><h1>Our project <span>gallery.</span></h1><p>Explore the electrical installations, engineering work, and project milestones delivered by Wattsin Technologies.</p></div></section>
+    <section class="gallery-content" aria-labelledby="gallery-title"><div class="gallery-heading"><div><h2 id="gallery-title">Selected work</h2><p><?= count($visibleGallery) ?> project<?= count($visibleGallery) === 1 ? '' : 's' ?> <?= $selectedCategory !== '' ? 'in ' . htmlspecialchars($selectedCategory) : 'across our capabilities' ?>.</p></div><nav class="gallery-filters" aria-label="Filter gallery by category"><a class="gallery-filter <?= $selectedCategory === '' ? 'active' : '' ?>" href="gallery.php">All work</a><?php foreach (array_keys($categories) as $category): ?><a class="gallery-filter <?= $selectedCategory === $category ? 'active' : '' ?>" href="gallery.php?category=<?= urlencode($category) ?>"><?= htmlspecialchars($category) ?></a><?php endforeach; ?></nav></div>
+        <?php if (!$visibleGallery): ?><div class="gallery-empty"><i class="fa-regular fa-images"></i><strong>No projects in this category yet.</strong>New work will appear here as it is published.</div><?php else: ?><div class="gallery-grid"><?php foreach ($visibleGallery as $item): ?><article class="gallery-item"><div class="gallery-media"><?php if (($item['type'] ?? '') === 'video'): ?><video controls preload="metadata" src="<?= htmlspecialchars($item['file']) ?>"></video><span class="gallery-type"><i class="fa-solid fa-film me-1"></i> Video</span><?php else: ?><img loading="lazy" src="<?= htmlspecialchars($item['file']) ?>" alt="<?= htmlspecialchars($item['title']) ?>"><span class="gallery-type"><i class="fa-regular fa-image me-1"></i> Image</span><?php endif; ?></div><div class="gallery-item-copy"><h3><?= htmlspecialchars($item['title']) ?></h3><span><?= htmlspecialchars($item['category']) ?></span></div></article><?php endforeach; ?></div><?php endif; ?>
+    </section>
+</main>
+
+<?php include "includes/footer.php"; ?>

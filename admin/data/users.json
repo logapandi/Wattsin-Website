@@ -1,0 +1,14 @@
+[
+    {
+        "name": "luvin",
+        "email": "luvinlogu@gmail.com",
+        "password": "$2y$10$czkjEEGKre6Uj5/Ft2oEwO2Y7oVbP.Azq/0z90C6vTLuUIxoSf3HK",
+        "created_at": "2026-08-23T13:13:44+02:00"
+    },
+    {
+        "name": "wattsin",
+        "email": "admin.wattsin@gmail.com",
+        "password": "$2y$10$sauizP4CBoMSG12j7YyeLu3gwsnudVl7B/ZilUdZTz7LWehFbyJne",
+        "created_at": "2026-11-19T14:44:13+01:00"
+    }
+]
